@@ -58,6 +58,43 @@ class WorkspaceManagement:
         conn.close()
         return f"Workspace ID '{workspace_id}' updated successfully."
 
+
+    def upload_file_to_workspace(self, workspace_id, source_file_path):
+        """Uploads a file into the workspace directory and saves metadata."""
+        if not os.path.isfile(source_file_path):
+            return "Error: Source file does not exist."
+
+        # Create directory if it doesn't exist
+        dest_folder = os.path.join("workspace_files", f"workspace_{workspace_id}")
+        os.makedirs(dest_folder, exist_ok=True)
+
+        # Copy file
+        filename = os.path.basename(source_file_path)
+        dest_path = os.path.join(dest_folder, filename)
+
+        try:
+            shutil.copy2(source_file_path, dest_path)
+        except Exception as e:
+            return f"Error copying file: {e}"
+
+        # Insert metadata into database
+        try:
+            with self.connect_db() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO files (workspace_id, filename, filepath, uploadedAt)
+                    VALUES (?, ?, ?, ?)
+                """, (
+                    workspace_id,
+                    filename,
+                    dest_path,
+                    datetime.now().isoformat()
+                ))
+                conn.commit()
+                return f"File '{filename}' uploaded successfully to workspace ID {workspace_id}."
+        except Exception as e:
+            return f"Error saving file metadata: {e}"
+
     def delete_workspace(self, workspace_id):
         """Deletes a workspace."""
         conn = self.connect_db()
