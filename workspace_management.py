@@ -2,7 +2,7 @@ import requests
 import os
 
 class WorkspaceAPI:
-    def __init__(self, base_url="http://localhost:3001", api_key=None):
+    def __init__(self, base_url="https://linbeckai.com/", api_key=None):
         self.base_url = base_url
         self.headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
 
