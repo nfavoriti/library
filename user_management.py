@@ -1,4 +1,4 @@
-import reqeusts
+import requests
 
 class UserManagement:
     def __init__(self, api_key: str | None = None,
