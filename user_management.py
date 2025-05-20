@@ -1,3 +1,5 @@
+import reqeusts
+
 class UserManagement:
     def __init__(self, api_key: str | None = None,
                  base_url: str = "https://linbeckai.com"):
