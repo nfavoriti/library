@@ -19,6 +19,3 @@ class UserManagement:
         payload = {"users": user_ids, "role": role}
         return requests.post(url, json=payload, headers=self.headers).json()
 
-
-##ip of instance pass ssh in database, provision, instal to anl anything llm library, make changes to app, create users, provide access
-#change it given anything llm, write code to run instance on its own, start thinking about that code, unit tests,
