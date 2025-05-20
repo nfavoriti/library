@@ -1,53 +1,23 @@
-import sqlite3
-from datetime import datetime
-
 class UserManagement:
-    def __init__(self, db_path="database.db"):
-        self.db_path = db_path
+    def __init__(self, api_key: str | None = None,
+                 base_url: str = "https://linbeckai.com"):
+        self.base = base_url.rstrip("/")
+        self.headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
 
-    def connect_db(self):
-        return sqlite3.connect(self.db_path)
+   def add_user(self, email, password, role="default"):
+        url = f"{self.base}/v1/admin/users/new"
+        payload = {"email": email, "password": password, "role": role}
+        return requests.post(url, json=payload, headers=self.headers).json()
 
-    def add_user(self, username, password, role='default'):
-        """Adds a new user to the system."""
-        conn = self.connect_db()
-        cursor = conn.cursor()
-        try:
-            cursor.execute("""
-                INSERT INTO users (username, password, role, createdAt, lastUpdatedAt)
-                VALUES (?, ?, ?, ?, ?)
-            """, (username, password, role, datetime.now(), datetime.now()))
-            conn.commit()
-            return f"User '{username}' added successfully."
-        except sqlite3.IntegrityError:
-            return "Error: Username already exists."
-        finally:
-            conn.close()
+   def delete_user(self, user_id):
+        url = f"{self.base}/v1/admin/users/{user_id}"
+        return requests.delete(url, headers=self.headers).json()
 
-    def delete_user(self, user_id):
-        """Deletes a user and their associated workspaces."""
-        conn = self.connect_db()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
-        conn.commit()
-        conn.close()
-        return f"User ID '{user_id}' deleted."
-
-    def assign_user_to_workspace(self, user_id, workspace_id, role):
-        """Assigns a user to a workspace."""
-        conn = self.connect_db()
-        cursor = conn.cursor()
-        try:
-            cursor.execute("""
-                INSERT INTO user_workspaces (user_id, workspace_id, role)
-                VALUES (?, ?, ?)
-            """, (user_id, workspace_id, role))
-            conn.commit()
-            return f"User ID '{user_id}' assigned to workspace '{workspace_id}' as '{role}'."
-        except sqlite3.IntegrityError:
-            return "Error: User is already assigned to this workspace."
-        finally:
-            conn.close()
+  def assign_users(self, workspace_id: int, user_ids: list[int],
+                     role: str = "member"):
+        url = f"{self.base}/v1/admin/workspaces/{workspace_id}/update-users"
+        payload = {"users": user_ids, "role": role}
+        return requests.post(url, json=payload, headers=self.headers).json()
 
 
 ##ip of instance pass ssh in database, provision, instal to anl anything llm library, make changes to app, create users, provide access
